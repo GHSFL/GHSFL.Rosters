@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/.idea/
+**/.vs/
+**/.git/
+**/*.user
+**/local.settings.json
+**/appsettings.Development.json
+**/Dockerfile
+**/.dockerignore
