@@ -10,11 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="DbThing" Version="1.0.7" />
-      <PackageReference Include="DbThingGenerator" Version="1.0.6" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\" />
+      <PackageReference Include="DbThingGenerator" Version="1.0.7" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>
