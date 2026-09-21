@@ -1,3 +1,4 @@
+using GHSFL.Rosters.API.Middleware;
 using GHSFL.Rosters.Core.Repositories;
 using GHSFL.Rosters.Core.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,6 +24,8 @@ builder.Services
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<RosterService>();
+builder.Services.AddScoped<RosterRepository>();
 builder.Services.AddAuthorization();
 
 var corsAllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -50,6 +53,8 @@ app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<SetUserMiddleware>();
 
 app.MapControllers();
 
