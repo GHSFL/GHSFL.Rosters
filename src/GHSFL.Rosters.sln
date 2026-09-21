@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHSFL.Rosters.Core", "GHSFL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHSFL.Rosters.API", "GHSFL.Rosters.API\GHSFL.Rosters.API.csproj", "{B6E01543-2E22-470A-8BC5-B68C95DECAC7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHSFL.Rosters.KeepAliveFunction", "GHSFL.Rosters.KeepAliveFunction\GHSFL.Rosters.KeepAliveFunction.csproj", "{F15456D7-CDFD-41D4-AD04-708F44E6DC23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{B6E01543-2E22-470A-8BC5-B68C95DECAC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6E01543-2E22-470A-8BC5-B68C95DECAC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6E01543-2E22-470A-8BC5-B68C95DECAC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F15456D7-CDFD-41D4-AD04-708F44E6DC23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15456D7-CDFD-41D4-AD04-708F44E6DC23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F15456D7-CDFD-41D4-AD04-708F44E6DC23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15456D7-CDFD-41D4-AD04-708F44E6DC23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

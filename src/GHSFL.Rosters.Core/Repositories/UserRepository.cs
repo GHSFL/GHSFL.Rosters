@@ -10,7 +10,7 @@ public class UserRepository(IConfiguration config) : DbRepository(config)
 {
     public async Task<User?> GetUser(string userId)
     {
-        var result = await QueryAsync<User>("spGetUserById", [new SqlParameter("@userId", userId)]);
+        var result = await QueryAsync<User>("GHSFL.spGetUserById", [new SqlParameter("@userId", userId)]);
         return result.FirstOrDefault();
     }
 
