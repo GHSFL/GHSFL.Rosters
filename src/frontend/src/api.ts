@@ -1,5 +1,12 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
+if (!apiBaseUrl) {
+  // Fails loudly instead of falling back to relative paths, which would
+  // silently resolve against whatever origin the app happens to be served
+  // from (e.g. GitHub Pages) rather than the actual API.
+  throw new Error('VITE_API_BASE_URL is not set')
+}
+
 export interface NewUser {
   userId: string
   userName: string
