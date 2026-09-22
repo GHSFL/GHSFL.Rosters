@@ -1,50 +1,48 @@
 import { useAuth0 } from '@auth0/auth0-react'
+import {
+  Alert,
+  Anchor,
+  Button,
+  Card,
+  Center,
+  Container,
+  Group,
+  Loader,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core'
 import { useEffect, useRef, useState } from 'react'
-import './App.css'
 import { createUser } from './api'
+import { RoundsTable } from './RoundsTable'
 import { PENDING_SIGNUP_KEY, SignupForm, type PendingSignup } from './SignupForm'
 
 function LoginButton() {
   const { loginWithRedirect } = useAuth0()
   return (
-    <button type="button" onClick={() => loginWithRedirect()}>
+    <Button type="button" onClick={() => loginWithRedirect()}>
       Log In
-    </button>
+    </Button>
   )
 }
 
 function LogoutButton() {
   const { logout } = useAuth0()
   return (
-    <button
+    <Button
       type="button"
+      variant="default"
       onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
     >
       Log Out
-    </button>
+    </Button>
   )
 }
 
 function Profile() {
-  const { user, getAccessTokenSilently } = useAuth0()
-  const [token, setToken] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { user } = useAuth0()
 
-  useEffect(() => {
-    getAccessTokenSilently()
-      .then((t) => setToken(t ?? null))
-      .catch((e: Error) => setError(e.message))
-  }, [getAccessTokenSilently])
-
-  return (
-    <div>
-      <p>Logged in as {user?.name ?? user?.email ?? user?.sub}</p>
-
-      <h2>Access Token (JWT)</h2>
-      {error && <p className="error">{error}</p>}
-      <textarea readOnly value={token ?? 'Loading...'} rows={12} className="token-box" />
-    </div>
-  )
+  return <Text>Logged in as {user?.name ?? user?.email ?? user?.sub}</Text>
 }
 
 type PendingSignupStatus = 'idle' | 'creating' | 'done' | 'error'
@@ -99,40 +97,74 @@ function App() {
   const pendingSignup = usePendingSignup()
 
   if (isLoading) {
-    return <p>Loading...</p>
+    return (
+      <Center mih="100svh">
+        <Loader />
+      </Center>
+    )
   }
 
   if (error) {
-    return <p className="error">Auth error: {error.message}</p>
+    return (
+      <Container size="xs" py="xl">
+        <Alert color="red" variant="light" title="Auth error">
+          {error.message}
+        </Alert>
+      </Container>
+    )
   }
 
   return (
-    <main className="app">
-      <h1>GHSFL Rosters</h1>
+    <Container size={isAuthenticated ? 'md' : 'xs'} py="xl">
       {isAuthenticated ? (
-        <>
-          {pendingSignup.status === 'creating' && <p>Setting up your account...</p>}
-          {pendingSignup.status === 'error' && (
-            <p className="error">
-              Couldn't finish setting up your account: {pendingSignup.error}
-            </p>
-          )}
-          <LogoutButton />
-          <Profile />
-        </>
-      ) : mode === 'signup' ? (
-        <SignupForm onCancel={() => setMode('login')} />
+        <Stack gap="lg">
+          <Group justify="space-between" align="center">
+            <Title order={1}>GHSFL Rosters</Title>
+            <LogoutButton />
+          </Group>
+
+          <Card withBorder shadow="sm" radius="md" p="lg">
+            <Stack gap="md">
+              {pendingSignup.status === 'creating' && (
+                <Text c="dimmed">Setting up your account...</Text>
+              )}
+              {pendingSignup.status === 'error' && (
+                <Alert color="red" variant="light">
+                  Couldn't finish setting up your account: {pendingSignup.error}
+                </Alert>
+              )}
+              <Profile />
+            </Stack>
+          </Card>
+
+          <RoundsTable />
+        </Stack>
       ) : (
         <>
-          <LoginButton />
-          <p>
-            <button type="button" className="link-button" onClick={() => setMode('signup')}>
-              Need an account? Sign up
-            </button>
-          </p>
+          <Title order={1} ta="center" mb="xl">
+            GHSFL Rosters
+          </Title>
+
+          {mode === 'signup' ? (
+            <Card withBorder shadow="sm" radius="md" p="lg">
+              <SignupForm onCancel={() => setMode('login')} />
+            </Card>
+          ) : (
+            <Card withBorder shadow="sm" radius="md" p="lg">
+              <Stack gap="md" align="center">
+                <LoginButton />
+                <Text size="sm">
+                  Need an account?{' '}
+                  <Anchor component="button" type="button" onClick={() => setMode('signup')}>
+                    Sign up
+                  </Anchor>
+                </Text>
+              </Stack>
+            </Card>
+          )}
         </>
       )}
-    </main>
+    </Container>
   )
 }
 

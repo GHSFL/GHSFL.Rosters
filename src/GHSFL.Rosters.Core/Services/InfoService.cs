@@ -9,4 +9,9 @@ public class InfoService(InfoRepository repository)
     {
         return await repository.GetRounds();
     }
+
+    public async Task<List<Club>> GetClubs()
+    {
+        return await repository.GetClubs();
+    }
 }

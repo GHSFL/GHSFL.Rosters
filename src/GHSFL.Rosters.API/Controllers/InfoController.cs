@@ -4,21 +4,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GHSFL.Rosters.API.Controllers;
 
-[Authorize]
 [Route("api/info")]
 public class InfoController(InfoService infoService) : ControllerBase
 {
+    [Authorize] 
     [HttpGet]
-    [Route("api/info/rounds")]
+    [Route("rounds")]
     public async Task<IActionResult> GetRounds()
     {
         return Ok(await infoService.GetRounds());
     }
 
     [HttpGet]
-    [Route("api/info/clubs")]
+    [Route("clubs")]
     public async Task<IActionResult> GetClubs()
     {
-        return Accepted();
+        return Ok(await infoService.GetClubs());
     }
 }

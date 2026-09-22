@@ -10,4 +10,9 @@ public class InfoRepository(IConfiguration config) : DbRepository(config)
     {
         return await QueryAsync<Round>("GHSFL.spInfoGetRounds");
     }
+    
+    public async Task<List<Club>> GetClubs()
+    {
+        return await QueryAsync<Club>("GHSFL.spInfoGetClubs");
+    }
 }
