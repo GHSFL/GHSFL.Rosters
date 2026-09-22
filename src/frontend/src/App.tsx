@@ -32,7 +32,9 @@ function LogoutButton() {
     <Button
       type="button"
       variant="default"
-      onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+      onClick={() =>
+        logout({ logoutParams: { returnTo: window.location.origin + import.meta.env.BASE_URL } })
+      }
     >
       Log Out
     </Button>
