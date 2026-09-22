@@ -10,9 +10,9 @@ public class UserController(UserService userService) : ControllerBase
 {
     [HttpPost]
     [Route("")]
-    public IActionResult CreateUser([FromBody] User newUser)
+    public async Task<IActionResult> CreateUser([FromBody] User newUser)
     {
-        userService.CreateUser(newUser);
-        return Ok();
+        await userService.CreateUser(newUser);
+        return Accepted();
     }
 }
