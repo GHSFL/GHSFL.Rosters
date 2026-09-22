@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using GHSFL.Rosters.API.Middleware;
 using GHSFL.Rosters.Core.Repositories;
 using GHSFL.Rosters.Core.Services;
@@ -10,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
