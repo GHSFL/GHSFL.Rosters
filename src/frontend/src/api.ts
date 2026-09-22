@@ -7,6 +7,18 @@ export interface NewUser {
   clubId: number
 }
 
+export interface Club {
+  clubId: number
+  clubName: string
+}
+
+export interface Round {
+  roundId: string
+  dates: string
+  hosts: string
+  notes: string | null
+}
+
 export async function createUser(token: string, user: NewUser): Promise<void> {
   const response = await fetch(`${apiBaseUrl}/api/user`, {
     method: 'POST',
@@ -20,4 +32,26 @@ export async function createUser(token: string, user: NewUser): Promise<void> {
   if (!response.ok) {
     throw new Error(`CreateUser failed (${response.status}): ${await response.text()}`)
   }
+}
+
+export async function getClubs(): Promise<Club[]> {
+  const response = await fetch(`${apiBaseUrl}/api/info/clubs`)
+
+  if (!response.ok) {
+    throw new Error(`GetClubs failed (${response.status}): ${await response.text()}`)
+  }
+
+  return response.json()
+}
+
+export async function getRounds(token: string): Promise<Round[]> {
+  const response = await fetch(`${apiBaseUrl}/api/info/rounds`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (!response.ok) {
+    throw new Error(`GetRounds failed (${response.status}): ${await response.text()}`)
+  }
+
+  return response.json()
 }

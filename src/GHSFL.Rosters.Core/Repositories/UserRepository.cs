@@ -25,6 +25,15 @@ public class UserRepository(IConfiguration config) : DbRepository(config)
         ]);
     }
 
+    public async Task<string?> CheckUserCanBeCreated(int clubId, string email)
+    {
+        var error = await QuerySingleColumnListAsync<string?>("GHSFL.spCheckUser", "Error", [
+            new SqlParameter("@clubId", clubId),
+            new SqlParameter("@email", email),
+        ]);
+        return error.SingleOrDefault();
+    }
+
     public void UpdateUserPermissionLevel(string userId, PermissionLevel level)
     {
         Execute("spUpdatePermissionLevelForUser", [

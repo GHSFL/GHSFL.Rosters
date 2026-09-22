@@ -3,62 +3,93 @@ using GHSFL.Rosters.API.Middleware;
 using GHSFL.Rosters.Core.Repositories;
 using GHSFL.Rosters.Core.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Add services to the container.
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithThreadId()
+        .WriteTo.Console());
 
-builder.Services.AddOpenTelemetry().UseAzureMonitor();
+    // Add services to the container.
 
-var auth0Domain = builder.Configuration["Auth0:Domain"];
-var auth0Audience = builder.Configuration["Auth0:Audience"];
+    builder.Services.AddControllers();
+    // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+    builder.Services.AddOpenApi();
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    builder.Services.AddOpenTelemetry().UseAzureMonitor();
+
+    var auth0Domain = builder.Configuration["Auth0:Domain"];
+    var auth0Audience = builder.Configuration["Auth0:Audience"];
+
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = $"https://{auth0Domain}/";
+            options.Audience = auth0Audience;
+        });
+
+    builder.Services.AddScoped<UserService>();
+    builder.Services.AddScoped<UserRepository>();
+    builder.Services.AddScoped<RosterService>();
+    builder.Services.AddScoped<RosterRepository>();
+    builder.Services.AddScoped<InfoService>();
+    builder.Services.AddScoped<InfoRepository>();
+    builder.Services.AddAuthorization();
+
+    var corsAllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                              ?? [];
+
+    builder.Services.AddCors(options =>
     {
-        options.Authority = $"https://{auth0Domain}/";
-        options.Audience = auth0Audience;
+        options.AddDefaultPolicy(policy =>
+            policy.WithOrigins(corsAllowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod());
     });
 
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<RosterService>();
-builder.Services.AddScoped<RosterRepository>();
-builder.Services.AddAuthorization();
+    var app = builder.Build();
 
-var corsAllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                          ?? [];
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+    }
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-        policy.WithOrigins(corsAllowedOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod());
-});
+    app.UseSerilogRequestLogging();
 
-var app = builder.Build();
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+    app.UseHttpsRedirection();
+
+    app.UseCors();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.UseMiddleware<SetUserMiddleware>();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseCors();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.UseMiddleware<SetUserMiddleware>();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex) when (ex is not HostAbortedException)
+{
+    Log.Fatal(ex, "GHSFL.Rosters.API terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

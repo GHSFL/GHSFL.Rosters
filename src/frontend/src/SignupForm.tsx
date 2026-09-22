@@ -1,6 +1,17 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { useState, type FormEvent } from 'react'
+import {
+  Alert,
+  Button,
+  Group,
+  PasswordInput,
+  Select,
+  Stack,
+  TextInput,
+  Title,
+} from '@mantine/core'
+import { useEffect, useState, type FormEvent } from 'react'
 import { signupWithAuth0 } from './auth0Signup'
+import { getClubs, type Club } from './api'
 
 export const PENDING_SIGNUP_KEY = 'ghsfl.pendingSignup'
 
@@ -18,9 +29,19 @@ export function SignupForm({ onCancel }: SignupFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [userName, setUserName] = useState('')
-  const [clubId, setClubId] = useState('')
+  const [clubId, setClubId] = useState<string | null>(null)
+  const [clubs, setClubs] = useState<Club[]>([])
+  const [clubsError, setClubsError] = useState<string | null>(null)
+  const [clubsLoading, setClubsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    getClubs()
+      .then(setClubs)
+      .catch((e: Error) => setClubsError(e.message))
+      .finally(() => setClubsLoading(false))
+  }, [])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -43,58 +64,59 @@ export function SignupForm({ onCancel }: SignupFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="signup-form">
-      <h2>Sign Up</h2>
-      {error && <p className="error">{error}</p>}
+    <form onSubmit={handleSubmit}>
+      <Stack gap="sm" maw={360} mx="auto">
+        <Title order={2}>Sign Up</Title>
+        {error && (
+          <Alert color="red" variant="light">
+            {error}
+          </Alert>
+        )}
 
-      <label>
-        Email
-        <input
+        <TextInput
+          label="Email"
           type="email"
           required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.currentTarget.value)}
         />
-      </label>
 
-      <label>
-        Password
-        <input
-          type="password"
+        <PasswordInput
+          label="Password"
           required
           minLength={8}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.currentTarget.value)}
         />
-      </label>
 
-      <label>
-        Display Name
-        <input
+        <TextInput
+          label="Display Name"
           required
           value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          onChange={(e) => setUserName(e.currentTarget.value)}
         />
-      </label>
 
-      <label>
-        Club ID
-        <input
-          type="number"
+        <Select
+          label="Club"
+          placeholder={clubsLoading ? 'Loading clubs...' : 'Select your club'}
           required
+          searchable
+          disabled={clubsLoading || !!clubsError}
+          data={clubs.map((c) => ({ value: String(c.clubId), label: c.clubName }))}
           value={clubId}
-          onChange={(e) => setClubId(e.target.value)}
+          onChange={setClubId}
+          error={clubsError && "Couldn't load clubs"}
         />
-      </label>
 
-      <div className="signup-actions">
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Signing up...' : 'Sign Up'}
-        </button>
-        <button type="button" onClick={onCancel} disabled={submitting}>
-          Cancel
-        </button>
-      </div>
+        <Group grow mt="sm">
+          <Button type="submit" loading={submitting} disabled={clubsLoading}>
+            Sign Up
+          </Button>
+          <Button type="button" variant="default" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
